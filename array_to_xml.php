@@ -3,38 +3,8 @@
 
 add_action( 'gform_after_submission', 'set_post_content', 10, 2 );
 
-// function combArrToXML($arrC=array(), $root="Formulaire", $element="Formulaire"){
-
-//   $doc = new DomDocument('1.0', 'UTF-8'); 
-//   $doc->formatOutput = true;
-
-//   $r = $doc->createElement( $root );
-//   $doc->appendChild( $r );
-
-//   // $b = $doc->createElement( $element );
-//   foreach( $arrC as  $key => $val)
-//   {
-//     $$key = $doc->createElement( $key );
-//     $$key->appendChild(
-//       $doc->createTextNode( $val )
-//     );
-//     // $b->appendChild( $$key );
-//     $r->appendChild( $$key );
-  
-//    //make the output pretty
-//    $doc->formatOutput = true;
-    
-//    //save xml file
-//    // $file_name = str_replace(' ', '_',$title).'_'.time().'.xml';
-//    $file_name = 'tests.xml';
-//    $doc->save($file_name);
-
-//   return $file_name;
-// 	}
-// }
-
 function combArrToXML($arrC=array(), $root="Formulaire", $element="element"){
-  $doc = new DOMDocument();
+  $doc = new DomDocument('1.0', 'UTF-8');
   $doc->formatOutput = true;
 
   $r = $doc->createElement( $root );
@@ -47,23 +17,32 @@ function combArrToXML($arrC=array(), $root="Formulaire", $element="element"){
     $$key->appendChild(
       $doc->createTextNode( $val )
     );
-    $r->appendChild( $$key );
- 
+    $r->appendChild($$key);
+
   }
 
-     //make the output pretty
+   //make the output pretty
    $doc->formatOutput = true;
+
+   $dir = 'wp-content/uploads/xml/';
     
    //save xml file
-   // $file_name = str_replace(' ', '_',$title).'_'.time().'.xml';
-   $file_name = 'wp-content/uploads/test.xml';
-   $doc->save($file_name);
+   $file_name = 'xml_'.time().'.xml';
+   $file = $dir.$file_name;
+   $doc->save($file);
+   $doc->saveXML();
 
-  return $doc->saveXML();
+
+  return $file_name;
 }
-function set_post_content(   $entry, $form ) {
 
-$b=array(
+function set_post_content(   $entry, $form ) {
+}
+
+add_filter( 'gform_notification_2', 'add_attachment_pdf', 10, 3 ); //target form id 2, change to your form id
+function add_attachment_pdf( $notification, $form, $entry ) {
+
+	$b=array(
 		"NomPrenom"=> $entry[2],
 		"VotreEmail"=> $entry[4],
 		"Adresse"=> $entry[5],
@@ -82,33 +61,22 @@ $b=array(
 
 // var_dump($entry);
 // var_dump(combArrToXML($b, "Formulaire", "element"));
-
-
 	
-combArrToXML($b, "Formulaire", "element");
+$namefile = combArrToXML($b, "Formulaire", "element");
 
-    $upload = wp_upload_dir();
-    $upload_path = $upload["basedir"];
+// var_dump($namefile);
 
-    $attachments = array();
-    $attachments[] = $upload_path . $doc;
-
-    return $attachments;
-
-
-}
-
-add_filter( 'gform_notification_2', 'add_attachment_pdf', 10, 3 ); //target form id 2, change to your form id
-function add_attachment_pdf( $notification, $form, $entry ) {
     //There is no concept of user notifications anymore, so we will need to target notifications based on other criteria,
     //such as name or subject
-  
+ 
         //get upload root for WordPress
         $upload = wp_upload_dir();
         $upload_path = $upload['basedir'];
  
         //add file, use full path , example -- $attachment = "C:\\xampp\\htdocs\\wpdev\\wp-content\\uploads\\test.txt"
-        $attachment = $upload_path . '/test.xml';
+        $attachment = $upload_path . '/xml/' . $namefile;
+
+      //  var_dump($attachment);
  
         GFCommon::log_debug( __METHOD__ . '(): file to be attached: ' . $attachment );
  
@@ -120,7 +88,7 @@ function add_attachment_pdf( $notification, $form, $entry ) {
             GFCommon::log_debug( __METHOD__ . '(): not attaching; file does not exist.' );
         }
 
-        var_dump($notification);
+       // var_dump($notification);
     
     //return altered notification object
     return $notification;
