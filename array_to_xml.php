@@ -1,7 +1,7 @@
 <?php
 
 
-add_action( 'gform_after_submission', 'set_post_content', 10, 2 );
+add_action( 'gform_after_submission', 'set_post_content', 10, 3 );
 
 function combArrToXML($arrC=array(), $root="Formulaire", $element="element"){
   $doc = new DomDocument('1.0', 'UTF-8');
@@ -39,7 +39,7 @@ function combArrToXML($arrC=array(), $root="Formulaire", $element="element"){
 function set_post_content(   $entry, $form ) {
 }
 
-add_filter( 'gform_notification_2', 'add_attachment_pdf', 10, 3 ); //target form id 2, change to your form id
+add_filter( 'gform_notification_1', 'add_attachment_pdf', 10, 3 ); //target form id 2, change to your form id
 function add_attachment_pdf( $notification, $form, $entry ) {
 
 	$b=array(
@@ -76,7 +76,7 @@ $namefile = combArrToXML($b, "Formulaire", "element");
         //add file, use full path , example -- $attachment = "C:\\xampp\\htdocs\\wpdev\\wp-content\\uploads\\test.txt"
         $attachment = $upload_path . '/xml/' . $namefile;
 
-      //  var_dump($attachment);
+        var_dump($attachment);
  
         GFCommon::log_debug( __METHOD__ . '(): file to be attached: ' . $attachment );
  
@@ -88,7 +88,7 @@ $namefile = combArrToXML($b, "Formulaire", "element");
             GFCommon::log_debug( __METHOD__ . '(): not attaching; file does not exist.' );
         }
 
-       // var_dump($notification);
+        // var_dump($notification);
     
     //return altered notification object
     return $notification;
